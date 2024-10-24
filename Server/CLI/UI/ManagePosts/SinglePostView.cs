@@ -33,7 +33,7 @@ internal class SinglePostView
         foreach (Comment comment in comments)
         {
             User user = await userRepository.GetSingleAsync(comment.UserId); // For each comment, load the associated user to get the username.
-            Console.WriteLine($"{user.UserName}: {comment.Body}");
+            Console.WriteLine($"{user.Username}: {comment.Body}");
         }
 
         Console.WriteLine();
