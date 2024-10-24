@@ -27,7 +27,7 @@ public class ListUsersView
         Console.WriteLine("[");
         foreach (User user in users)
         {
-            Console.WriteLine($"\tID: {user.Id}, Name: {user.UserName}");
+            Console.WriteLine($"\tID: {user.Id}, Name: {user.Username}");
         }
 
         Console.WriteLine("]");
