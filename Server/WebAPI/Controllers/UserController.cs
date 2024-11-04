@@ -1,4 +1,4 @@
-﻿using DTOs;
+﻿using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
@@ -64,5 +64,4 @@ public class UserController : ControllerBase
             users = users.Where(u => u.Username.ToLower().Contains(userUsername.ToLower()));
         return Results.Ok(users);
     }
-    }
-    
+}
