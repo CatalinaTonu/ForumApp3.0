@@ -18,14 +18,15 @@ public class PostController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreateCommentDto>> CreatePost([FromBody] CreatePostDto req, [FromServices]
-        IPostRepository
-            postRepository)
+    public async Task<ActionResult<CreateCommentDto>> CreatePost(
+        [FromBody] CreatePostDto req,
+        [FromServices] IPostRepository postRepository)
     {
         Post post = new Post(req.Title, req.Body, req.UserId);
         Post created = await postRepository.AddAsync(post);
         CreateCommentDto dto = new()
         {
+            
             Body = created.Body,
             UserId = created.UserId
         };

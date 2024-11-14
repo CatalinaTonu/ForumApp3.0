@@ -1,0 +1,100 @@
+﻿@page "/posts"
+@using BlazorApp.Services
+@using Entities
+@using ApiContracts
+@inject IPostService PostService
+
+<h3>Manage Posts</h3>
+
+<button class="btn btn-primary" @onclick="LoadPosts">View Posts</button>
+
+@if (posts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (posts.Count == 0)
+{
+    <p>No posts found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Body</th>
+                <th>User ID</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var post in posts)
+        {
+            <tr>
+                <td>@post.Title</td>
+                <td>@post.Body</td>
+                <td>@post.UserId</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<h4>Add New Post</h4>
+<EditForm Model="@createPostDto" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Title:</label>
+        <InputText id="title" class="form-control" @bind-Value="createPostDto.Title" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="body" class="form-label">Body:</label>
+        <InputTextArea id="body" class="form-control" @bind-Value="createPostDto.Body" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="userId" class="form-label">User ID:</label>
+        <InputNumber id="userId" class="form-control" @bind-Value="createPostDto.UserId" required />
+    </div>
+
+    <button type="submit" class="btn btn-success">Create Post</button>
+</EditForm>
+
+@if (createStatus != null)
+{
+    <div class="alert alert-info">@createStatus</div>
+}
+
+@code {
+    private List<Post> posts;
+    private CreatePostDto createPostDto = new CreatePostDto();
+    private string createStatus;
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
+        posts = (await PostService.GetPostsAsync()).ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var addedPostDto = await PostService.AddPostAsync(createPostDto);
+            // Convert DTO back to Post for display
+            posts.Add(new Post(addedPostDto.Title, addedPostDto.Body, addedPostDto.UserId));
+            createStatus = $"Post created successfully with ID: {addedPostDto.UserId}";
+            createPostDto = new CreatePostDto(); // Reset form after submission
+        }
+        catch (Exception ex)
+        {
+            createStatus = $"Error creating post: {ex.Message}";
+        }
+    }
+}

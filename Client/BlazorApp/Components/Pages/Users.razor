@@ -1,0 +1,124 @@
+﻿@page "/users"
+@using ApiContracts
+@using BlazorApp.Services
+@using Entities
+@inject IUserService UserService
+
+<h3>Registered Users</h3>
+
+<button class="btn btn-primary" @onclick="ToggleUserVisibility">View Users</button>
+
+@if (showUsers)
+{
+if (users == null)
+{
+<p><em>Loading...</em></p>
+}
+else if (users.Count == 0)
+{
+<p>No registered users found.</p>
+}
+else
+{
+<table class="table">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Password (Encrypted)</th> <!-- Displaying 'Encrypted' for demonstration -->
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in users)
+    {
+    <tr>
+        <td>@user.Username</td>
+        <td>*****</td> <!-- Do not display passwords; placeholder only -->
+        <td><button class="btn btn-danger" @onclick="() => DeleteUser(user.Id)">Delete</button></td>
+    </tr>
+    }
+    </tbody>
+</table>
+}
+}
+
+<h4>Add New User</h4>
+<EditForm Model="@newUser" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <InputText id="username" class="form-control" @bind-Value="newUser.Username" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText id="password" class="form-control" @bind-Value="newUser.Password" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Add User</button>
+</EditForm>
+
+@if (createStatus != null)
+{
+<div class="alert alert-info">@createStatus</div>
+}
+
+@code {
+private List<User> users;
+private CreateUserDto newUser = new CreateUserDto();
+private string createStatus;
+private bool showUsers = false;
+
+protected override async Task OnInitializedAsync()
+{
+// Do not automatically load users
+}
+
+private async Task LoadUsers()
+{
+users = (await UserService.GetUsersAsync()).ToList();
+}
+
+private void ToggleUserVisibility()
+{
+showUsers = !showUsers;
+if (showUsers)
+{
+LoadUsers(); // Load users only when needed
+}
+}
+
+private async Task HandleValidSubmit()
+{
+try
+{
+await UserService.AddUserAsync(newUser);
+createStatus = "User added successfully.";
+if (showUsers)
+{
+await LoadUsers(); // Reload the list to include the new user if it's being viewed
+}
+newUser = new CreateUserDto(); // Reset the form
+}
+catch (Exception ex)
+{
+createStatus = $"Error adding user: {ex.Message}";
+}
+}
+
+private async Task DeleteUser(int id)
+{
+try
+{
+await UserService.DeleteUserAsync(id);
+await LoadUsers(); // Reload the list to exclude the deleted user
+createStatus = "User deleted successfully.";
+}
+catch (Exception ex)
+{
+createStatus = $"Error deleting user: {ex.Message}";
+}
+}
+}
