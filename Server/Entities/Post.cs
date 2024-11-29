@@ -13,4 +13,5 @@ public class Post
         Body = body;
         UserId = userId;
     }
+   public Post(){}
 }
